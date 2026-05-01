@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="ElectionBot - AI-powered Election Education Assistant for India">
+    <meta name="author" content="Sandeep Kumar">
+    <title>🗳️ ElectionBot - Election Education Assistant</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="bg-particles" id="bgParticles" aria-hidden="true"></div>
+    <header class="header" role="banner">
+        <div class="header-content">
+            <div class="logo" id="logo">
+                <div class="logo-icon-wrapper">
+                    <span class="logo-icon">🗳️</span>
+                    <div class="logo-pulse"></div>
+                </div>
+                <div class="logo-text">
+                    <h1>ElectionBot</h1>
+                    <p>India's Election Education Assistant</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <div class="header-badges">
+                    <span class="badge badge-neutral" id="badgeNeutral"><i class="fas fa-balance-scale"></i> Non-Partisan</span>
+                    <span class="badge badge-powered" id="badgePowered"><i class="fas fa-bolt"></i> Gemini AI</span>
+                </div>
+                <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle dark mode"><i class="fas fa-moon"></i></button>
+            </div>
+        </div>
+        <div class="tricolor-stripe" aria-hidden="true">
+            <div class="stripe-saffron"></div>
+            <div class="stripe-white"></div>
+            <div class="stripe-green"></div>
+        </div>
+    </header>
+    <div class="main-container">
+        <aside class="sidebar" id="sidebar" role="complementary">
+            <button class="sidebar-close" id="sidebarClose" onclick="toggleSidebar()"><i class="fas fa-times"></i></button>
+            <div class="sidebar-section">
+                <h3 class="sidebar-title"><i class="fas fa-book-open"></i> Learn About</h3>
+                <div class="topics-grid" id="topicsGrid">
+                    {% for topic in topics %}
+                    <button class="topic-btn" id="topic-{{ topic.id }}" onclick="loadTopic('{{ topic.id }}')" title="{{ topic.description }}">
+                        <span class="topic-icon">{{ topic.icon }}</span>
+                        <div class="topic-info">
+                            <span class="topic-title">{{ topic.title }}</span>
+                            <span class="topic-desc">{{ topic.description }}</span>
+                        </div>
+                        <i class="fas fa-chevron-right topic-arrow"></i>
+                    </button>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="info-card glass-card" id="infoCard">
+                <h4>🇮🇳 Indian Election Facts</h4>
+                <ul class="facts-list">
+                    <li><strong>97 Crore+</strong> registered voters</li>
+                    <li><strong>543</strong> Lok Sabha seats</li>
+                    <li><strong>10 Lakh+</strong> polling stations</li>
+                    <li><strong>50 Lakh+</strong> election officials</li>
+                    <li><strong>40 Lakh+</strong> EVMs used</li>
+                </ul>
+                <div class="fact-highlight"><span>🌍</span> World's Largest Democracy</div>
+            </div>
+            <div class="links-card glass-card" id="linksCard">
+                <h4>🔗 Official Resources</h4>
+                <a href="https://www.eci.gov.in" target="_blank" rel="noopener" class="ext-link" id="link-eci">
+                    <i class="fas fa-landmark"></i> Election Commission of India
+                </a>
+                <a href="https://voters.eci.gov.in" target="_blank" rel="noopener" class="ext-link" id="link-voters">
+                    <i class="fas fa-user-check"></i> Voter Registration Portal
+                </a>
+                <a href="https://nvsp.in" target="_blank" rel="noopener" class="ext-link" id="link-nvsp">
+                    <i class="fas fa-id-card"></i> NVSP - National Voter Service
+                </a>
+            </div>
+        </aside>
+        <main class="chat-container" role="main">
+            <div class="mobile-bar" id="mobileBar">
+                <button class="menu-btn" id="menuBtn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+                <span class="mobile-title">ElectionBot</span>
+                <button class="mobile-clear" id="mobileClear" onclick="clearChat()"><i class="fas fa-trash-alt"></i></button>
+            </div>
+            <div class="chat-messages" id="chatMessages" role="log" aria-live="polite">
+                <div class="message bot-message welcome-message" id="welcomeMessage">
+                    <div class="message-avatar">🗳️</div>
+                    <div class="message-content">
+                        <div class="message-bubble welcome-bubble">
+                            <h3>👋 Namaste! Welcome to ElectionBot</h3>
+                            <p class="welcome-subtitle">Your interactive guide to India's democratic process</p>
+                            <p>I'm here to help you understand <strong>India's election process</strong> in a simple, engaging, and completely <strong>non-partisan</strong> way.</p>
+                            <div class="welcome-divider"><span>🎯 What would you like to learn?</span></div>
+                            <div class="quick-start-grid" id="quickStartGrid">
+                                <button class="quick-start-btn" id="qs-process" onclick="sendQuickQuestion('Explain the complete Indian election process from start to finish')">
+                                    <span class="qs-icon">📚</span><span class="qs-text">Complete Election Process</span>
+                                </button>
+                                <button class="quick-start-btn" id="qs-register" onclick="sendQuickQuestion('How do I register as a voter in India?')">
+                                    <span class="qs-icon">📝</span><span class="qs-text">Register to Vote</span>
+                                </button>
+                                <button class="quick-start-btn" id="qs-vote" onclick="sendQuickQuestion('How does voting work on election day?')">
+                                    <span class="qs-icon">🗳️</span><span class="qs-text">How to Vote</span>
+                                </button>
+                                <button class="quick-start-btn" id="qs-quiz" onclick="sendQuickQuestion('Give me a quiz on Indian elections')">
+                                    <span class="qs-icon">🎯</span><span class="qs-text">Test My Knowledge</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="message-time">Just now</div>
+                    </div>
+                </div>
+            </div>
+            <div class="quick-questions-bar" id="quickQuestionsBar">
+                <div class="quick-questions-scroll" id="quickQuestionsScroll">
+                    {% for question in quick_questions %}
+                    <button class="quick-q-btn" onclick="sendQuickQuestion('{{ question }}')" id="qq-{{ loop.index }}">{{ question }}</button>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="chat-input-container" id="chatInputContainer">
+                <div class="chat-input-wrapper" id="chatInputWrapper">
+                    <button class="clear-btn" id="clearBtn" onclick="clearChat()" title="Clear chat"><i class="fas fa-trash-alt"></i></button>
+                    <textarea id="userInput" placeholder="Ask anything about elections..." rows="1" onkeydown="handleKeyPress(event)" oninput="autoResize(this)"></textarea>
+                    <button class="send-btn" id="sendBtn" onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
+                </div>
+                <div class="input-hint">Press <kbd>Enter</kbd> to send · <kbd>Shift+Enter</kbd> for new line · Powered by Gemini AI</div>
+            </div>
+        </main>
+    </div>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+    <div class="toast" id="toast" role="alert"></div>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
